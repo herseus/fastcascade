@@ -1,10 +1,8 @@
 package com.databilize.fastcascade;
 
-import java.util.List;
-
-public class Level2Data {
+public class LevelData {
 	private String name;
-	private List<Level3Data> data;
+	private Object data;
 
 	public String getName() {
 		return name;
@@ -14,12 +12,11 @@ public class Level2Data {
 		this.name = name;
 	}
 
-	public List<Level3Data> getData() {
+	public Object getData() {
 		return data;
 	}
 
-	public void setData(List<Level3Data> data) {
+	public void setData(Object data) {
 		this.data = data;
 	}
-
 }

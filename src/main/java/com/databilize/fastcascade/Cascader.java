@@ -8,20 +8,30 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+/**
+ * 提供静态方法，用于构造三级数据级联
+ * 
+ * @author 0x3D
+ *
+ */
 public class Cascader {
 
 	/**
-	 * 三级级联 按字段名从对象中获取字段值，并按照field1为第一级、field2 为第二级、field3为第三级提取级联数据
+	 * 读取srcList中的每条数据，提取fieldName1、fieldName2、 fieldName3的值，构造三级数据级联
 	 * 
-	 * @param list
-	 * @param field1
-	 * @param field2
-	 * @param field3
-	 * @return
+	 * @param srcList
+	 *            源数据列表
+	 * @param fieldName1
+	 *            第一级原始字段名
+	 * @param fieldName2
+	 *            第二级原始字段名
+	 * @param fieldName3
+	 *            第三级原始字段名
+	 * @return List<LevelData>
 	 */
-	public static <T> List<Level1Data> transform(List<T> list, String fieldName1, String fieldName2,
+	public static <T> List<LevelData> transform2List(List<T> srcList, String fieldName1, String fieldName2,
 			String fieldName3) {
-		if (null == list || list.isEmpty()) {
+		if (null == srcList || srcList.isEmpty()) {
 			return null;
 		}
 
@@ -29,59 +39,61 @@ public class Cascader {
 			return null;
 		}
 
-		// result存储级联结果
-		Object field1 = null;
-		Object field2 = null;
-		Object field3 = null;
+		// 三个字段值
+		Object fieldValue1 = null;
+		Object fieldValue2 = null;
+		Object fieldValue3 = null;
 		T obj = null;
 
 		Map<Object, Map<Object, Map<Object, Object>>> tempMap = new HashMap<>();
 
 		// 将三级数据存放在Map中
-		for (int cnt = 0, size = list.size(); cnt < size; cnt++) {
-			obj = list.get(cnt);
-			field1 = getFieldValue(obj, fieldName1);
-			field2 = getFieldValue(obj, fieldName2);
-			field3 = getFieldValue(obj, fieldName3);
+		for (int cnt = 0, size = srcList.size(); cnt < size; cnt++) {
+			// 当前处理的数据
+			obj = srcList.get(cnt);
+			// 读取三个字段值
+			fieldValue1 = getFieldValue(obj, fieldName1);
+			fieldValue2 = getFieldValue(obj, fieldName2);
+			fieldValue3 = getFieldValue(obj, fieldName3);
 
 			// 默认每一级没有重复的数据，直接以字段值为key
-			if (!tempMap.containsKey(field1)) {
-				tempMap.put(field1, new HashMap<>());
+			if (!tempMap.containsKey(fieldValue1)) {
+				tempMap.put(fieldValue1, new HashMap<>());
 			}
 
-			if (!tempMap.get(field1).containsKey(field2)) {
-				tempMap.get(field1).put(field2, new HashMap<>());
+			if (!tempMap.get(fieldValue1).containsKey(fieldValue2)) {
+				tempMap.get(fieldValue1).put(fieldValue2, new HashMap<>());
 			}
 
-			if (!tempMap.get(field1).get(field2).containsKey(field3)) {
-				tempMap.get(field1).get(field2).put(field3, new HashMap<>());
+			if (!tempMap.get(fieldValue1).get(fieldValue2).containsKey(fieldValue3)) {
+				tempMap.get(fieldValue1).get(fieldValue2).put(fieldValue3, new HashMap<>());
 			}
 		}
 
 		// 将Map转换为List
-		List<Level1Data> result = new ArrayList<>();
-		Level1Data level1Data = null;
-		Level2Data level2Data = null;
-		Level3Data level3Data = null;
-		List<Level2Data> level2DataList = null;
-		List<Level3Data> level3DataList = null;
+		List<LevelData> result = new ArrayList<>();
+		LevelData level1Data = null;
+		LevelData level2Data = null;
+		LevelData level3Data = null;
+		List<LevelData> level2DataList = null;
+		List<LevelData> level3DataList = null;
 
 		for (Map.Entry<Object, Map<Object, Map<Object, Object>>> level1Ele : tempMap.entrySet()) {
-			level1Data = new Level1Data();
+			level1Data = new LevelData();
 
 			level1Data.setName(level1Ele.getKey().toString());
 
 			level2DataList = new ArrayList<>();
 
 			for (Map.Entry<Object, Map<Object, Object>> level2Ele : level1Ele.getValue().entrySet()) {
-				level2Data = new Level2Data();
+				level2Data = new LevelData();
 
 				level2Data.setName(level2Ele.getKey().toString());
 
 				level3DataList = new ArrayList<>();
 
 				for (Map.Entry<Object, Object> level3Ele : level2Ele.getValue().entrySet()) {
-					level3Data = new Level3Data();
+					level3Data = new LevelData();
 					level3Data.setName(level3Ele.getKey().toString());
 					level3Data.setData(level3Ele.getValue());
 
@@ -101,7 +113,13 @@ public class Cascader {
 		return result;
 	}
 
-	// 反射
+	/**
+	 * 通过反射获取字段值
+	 * 
+	 * @param obj
+	 * @param fieldName
+	 * @return
+	 */
 	public static <T> Object getFieldValue(T obj, String fieldName) {
 		Object value = null;
 		if (null == obj || StringUtils.isBlank(fieldName)) {
@@ -117,6 +135,112 @@ public class Cascader {
 		}
 		return value;
 
+	}
+
+	/**
+	 * 读取srcList中的每条数据，提取fieldName1、fieldName2、
+	 * fieldName3的值，对应的目标字段名为targetFieldName1、targetFieldName2、targetFieldName3，构造三级数据级联。
+	 * 
+	 * 
+	 * @param srcList
+	 *            源数据列表
+	 * @param fieldName1
+	 *            第一级原始字段名
+	 * @param fieldName2
+	 *            第二级原始字段名
+	 * @param fieldName3
+	 *            第三级原始字段名
+	 * @param targetFieldName1
+	 *            第一级目标字段名
+	 * @param targetFieldName2
+	 *            第二级目标字段名
+	 * @param targetFieldName3
+	 *            第三级目标字段名
+	 * @return Map<String, Object>
+	 */
+	public static <T> Map<String, Object> transform2Map(List<T> srcList, String fieldName1, String fieldName2,
+			String fieldName3, String targetFieldName1, String targetFieldName2, String targetFieldName3) {
+		if (null == srcList || srcList.isEmpty()) {
+			return null;
+		}
+
+		if (StringUtils.isAnyBlank(fieldName1, fieldName2, fieldName3)) {
+			return null;
+		}
+
+		// 三个字段值
+		Object fieldValue1 = null;
+		Object fieldValue2 = null;
+		Object fieldValue3 = null;
+		T obj = null;
+
+		Map<Object, Map<Object, Map<Object, Object>>> tempMap = new HashMap<>();
+
+		// 将三级数据存放在Map中
+		for (int cnt = 0, size = srcList.size(); cnt < size; cnt++) {
+			// 当前处理的数据
+			obj = srcList.get(cnt);
+			// 读取三个字段值
+			fieldValue1 = getFieldValue(obj, fieldName1);
+			fieldValue2 = getFieldValue(obj, fieldName2);
+			fieldValue3 = getFieldValue(obj, fieldName3);
+
+			// 默认每一级没有重复的数据，直接以字段值为key
+			if (!tempMap.containsKey(fieldValue1)) {
+				tempMap.put(fieldValue1, new HashMap<>());
+			}
+
+			if (!tempMap.get(fieldValue1).containsKey(fieldValue2)) {
+				tempMap.get(fieldValue1).put(fieldValue2, new HashMap<>());
+			}
+
+			if (!tempMap.get(fieldValue1).get(fieldValue2).containsKey(fieldValue3)) {
+				tempMap.get(fieldValue1).get(fieldValue2).put(fieldValue3, new HashMap<>());
+			}
+		}
+
+		// 将Map转换为List
+		Map<String, Object> result = null;
+		Map<String, Object> level1Data = null;
+		Map<String, Object> level2Data = null;
+		Map<String, Object> level3Data = null;
+		List<Map<String, Object>> level1DataList = new ArrayList<>();
+		List<Map<String, Object>> level2DataList = null;
+		List<Map<String, Object>> level3DataList = null;
+
+		for (Map.Entry<Object, Map<Object, Map<Object, Object>>> level1Ele : tempMap.entrySet()) {
+			level1Data = new HashMap<>();
+			level1Data.put("name", level1Ele.getKey().toString());
+
+			level2DataList = new ArrayList<>();
+
+			for (Map.Entry<Object, Map<Object, Object>> level2Ele : level1Ele.getValue().entrySet()) {
+				level2Data = new HashMap<>();
+				level2Data.put("name", level2Ele.getKey().toString());
+
+				level3DataList = new ArrayList<>();
+
+				for (Map.Entry<Object, Object> level3Ele : level2Ele.getValue().entrySet()) {
+					level3Data = new HashMap<>();
+					level3Data.put("name", level3Ele.getKey().toString());
+					level3Data.put("data", level3Ele.getValue());
+
+					level3DataList.add(level3Data);
+
+				}
+
+				level2Data.put(targetFieldName3, level3DataList);
+				level2DataList.add(level2Data);
+			}
+
+			level1Data.put(targetFieldName2, level2DataList);
+			level1DataList.add(level1Data);
+
+		}
+
+		result = new HashMap<>();
+		result.put(targetFieldName1, level1DataList);
+		return result;
 	}
 
 }
