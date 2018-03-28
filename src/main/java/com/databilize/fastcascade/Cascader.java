@@ -16,7 +16,7 @@ import com.databilize.fastcascade.annotations.ClassPreamble;
  * @author 0x3D
  *
  */
-@ClassPreamble(author = "zejunreading@gmail.com", date = "2018-03-23")
+@ClassPreamble(author = "herseus", date = "2018-03-23")
 public class Cascader {
 
 	/**
