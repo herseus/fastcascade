@@ -13,3 +13,5 @@ Classic Cascading of Three-level Data
 应用：
 
 将一条条数据拼装成级联的结构
+
+支持指定目标字段名
