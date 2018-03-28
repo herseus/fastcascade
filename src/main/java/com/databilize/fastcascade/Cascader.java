@@ -8,12 +8,15 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 
+import com.databilize.fastcascade.annotations.ClassPreamble;
+
 /**
  * 提供静态方法，用于构造三级数据级联
  * 
  * @author 0x3D
  *
  */
+@ClassPreamble(author = "zejunreading@gmail.com", date = "2018-03-23")
 public class Cascader {
 
 	/**
